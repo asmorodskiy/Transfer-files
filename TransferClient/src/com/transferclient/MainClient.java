@@ -1,17 +1,17 @@
 package com.transferclient;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class MainClient {
-
+	
 	/**
 	 * @param args
 	 */
@@ -43,30 +43,18 @@ public class MainClient {
 			try {				
 				sock = new Socket(targetHost,port);				
 				
-				// sendfile
+					// sendfile
 			      File myFile = new File (filePath);
 			      OutputStream os = sock.getOutputStream();
-			      BufferedOutputStream bufr = new BufferedOutputStream(os);
-			      DataOutputStream dos = new DataOutputStream(bufr);
-			      dos.writeLong(myFile.length());
-			      Thread.sleep(1000);
-			      if(!targetPath.isEmpty())
-			      {
-			    	  dos.writeLong(targetPath.length());
-			    	  Thread.sleep(1000);
-			    	  dos.writeBoolean(true);
-			    	  Thread.sleep(1000);
-			    	  dos.writeChars(targetPath);			    	  
-			      }
-			      else
-			      {
-			    	  dos.writeLong(myFile.getName().length());
-			    	  Thread.sleep(1000);
-			    	  dos.writeBoolean(false);
-			    	  Thread.sleep(1000);
-			    	  dos.write(myFile.getName().getBytes());			    	  
-			      }
+			      OutputStreamWriter os_writer = new OutputStreamWriter(os);
+			      BufferedWriter bufr = new BufferedWriter(os_writer);
 			      
+			      Thread.sleep(1000);
+			      if(targetPath.isEmpty()) bufr.write(String.format("%d|%d%s",myFile.length(),0,myFile.getName()));
+			      else bufr.write(String.format("%d|%d%s",myFile.length(),1,targetPath));
+			      
+			      bufr.flush();
+			      bufr.close();
 			      sock.close();
 			      Thread.sleep(1000);
 			      

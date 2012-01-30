@@ -36,7 +36,8 @@ public class MainServer {
 
 				InputStream is = sock.getInputStream();
 
-				DataInputStream dis = new DataInputStream(is);
+				
+
 
 				long filesize = dis.readLong();
 				
