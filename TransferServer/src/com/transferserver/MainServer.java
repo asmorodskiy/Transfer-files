@@ -6,6 +6,11 @@ import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+// put command in one string , use java.io.Writer / Reader
+// make block reading , writing
+// try to use Java NIO channels
+
+
 public class MainServer {
 
 	/**
