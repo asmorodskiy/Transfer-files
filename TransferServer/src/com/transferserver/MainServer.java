@@ -1,10 +1,12 @@
 package com.transferserver;
 
-import java.io.DataInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.StringTokenizer;
 
 // put command in one string , use java.io.Writer / Reader
 // make block reading , writing
@@ -36,22 +38,23 @@ public class MainServer {
 
 				InputStream is = sock.getInputStream();
 
+				InputStreamReader reader = new InputStreamReader(is);
 				
-
-
-				long filesize = dis.readLong();
+				BufferedReader breader = new BufferedReader(reader);
 				
-				long filenamesize = dis.readLong();
+				StringTokenizer response=new StringTokenizer(breader.readLine());
 				
-				boolean indicator = dis.readBoolean();
+				String filesizestr = response.nextToken();
 				
-				byte [] mybytearray  = new byte [(int) filenamesize];
+				String boolstr = response.nextToken();
 				
-				dis.read(mybytearray,0,(int)filenamesize);
+				String filePath = response.nextToken();
 				
-				String name = new String(mybytearray);
+				long filesize = Long.valueOf(filesizestr);
 				
-				Runnable runnable = new GetFiles(filesize,name,indicator,port-1);
+				boolean indicator = boolstr.equals("1");
+				
+				Runnable runnable = new GetFiles(filesize,filePath,indicator,port-1);
 				
 				(new Thread(runnable)).start();
 

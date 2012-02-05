@@ -1,6 +1,5 @@
 package com.transferclient;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,38 +37,50 @@ public class MainClient {
 				System.exit(1);
 			}
 		
-		    Socket sock;
+		    Socket welcomeSocket;
 		    
 			try {				
-				sock = new Socket(targetHost,port);				
 				
-					// sendfile
-			      File myFile = new File (filePath);
-			      OutputStream os = sock.getOutputStream();
-			      OutputStreamWriter os_writer = new OutputStreamWriter(os);
-			      BufferedWriter bufr = new BufferedWriter(os_writer);
-			      
-			      Thread.sleep(1000);
-			      if(targetPath.isEmpty()) bufr.write(String.format("%d|%d%s",myFile.length(),0,myFile.getName()));
-			      else bufr.write(String.format("%d|%d%s",myFile.length(),1,targetPath));
-			      
-			      bufr.flush();
-			      bufr.close();
-			      sock.close();
+				  welcomeSocket = new Socket(targetHost,port);
+				  
+				  int block_size = 1048576;
+				
+					
+			      File fileToSend = new File (filePath);
+			      OutputStream socketStream = welcomeSocket.getOutputStream();
+			      OutputStreamWriter socketStream_writer = new OutputStreamWriter(socketStream);
+			      BufferedWriter buferedWriter = new BufferedWriter(socketStream_writer);
+			      if(targetPath.isEmpty()) buferedWriter.write(String.format("%d %d %s",fileToSend.length(),0,fileToSend.getName()));
+			      else buferedWriter.write(String.format("%d %d %s",fileToSend.length(),1,targetPath));			      
+			      buferedWriter.flush();
+			      buferedWriter.close();
+			      welcomeSocket.close();
 			      Thread.sleep(1000);
 			      
 			      Socket sockWrite = new Socket(targetHost,port-1);
-			      byte [] mybytearray  = new byte [(int)myFile.length()];
-			      FileInputStream fis = new FileInputStream(myFile);
-			      BufferedInputStream bis = new BufferedInputStream(fis);
-			      bis.read(mybytearray,0,mybytearray.length);
-			      OutputStream wos = sockWrite.getOutputStream();			      
-			      wos.write(mybytearray,0,mybytearray.length);
-			      wos.flush();
 			      
+			      byte [] byteBuffer  = new byte [block_size];
+			      FileInputStream fileIS = new FileInputStream(fileToSend);			      
+			      OutputStream WriteSocketStream = sockWrite.getOutputStream();			      
+			      
+			      if(fileToSend.length()<block_size)
+			      {
+			    	  fileIS.read(byteBuffer);
+			    	  WriteSocketStream.write(byteBuffer,0,byteBuffer.length);			    	  
+			      }
+			      else
+			      {
+				      int nextByte = 0;
+				      do {				    	  
+				    	  nextByte=fileIS.read(byteBuffer);
+				    	  if(nextByte>=1) WriteSocketStream.write(byteBuffer,0,nextByte);
+				    	  else break;
+				    	  WriteSocketStream.flush();				    	  
+				      }while(true);
+			      }
+			      sockWrite.close();
 			   	
-			} catch (UnknownHostException e) {
-				
+			} catch (UnknownHostException e) {				
 				e.printStackTrace();
 			} catch (IOException e) {				
 				e.printStackTrace();

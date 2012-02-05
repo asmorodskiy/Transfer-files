@@ -1,6 +1,5 @@
 package com.transferserver;
 
-import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,32 +25,37 @@ public class GetFiles implements Runnable {
 	public void run() {
 		
 		ServerSocket servsock;	    
-	    int bytesRead;   
+	    int bytesRead = 0;   
 	    
 		try {
 			servsock = new ServerSocket(port);
-			while (true) {			      
-
-			      	Socket sock = servsock.accept();      			      	
-			      	byte [] mybytearray  = new byte [(int) filesize];
-				    InputStream is = sock.getInputStream();
-				    String realPath;
-				    if(indicator) realPath = name; 
-				    else realPath = folder+"/"+name;
-				    FileOutputStream fos = new FileOutputStream(realPath);
-				    BufferedOutputStream bos = new BufferedOutputStream(fos);
-				    bytesRead = is.read(mybytearray,0,mybytearray.length);				    
-				    bos.write(mybytearray, 0 , bytesRead);
-				    bos.flush();				    
-				    bos.close();
-				    sock.close();			      
-			    }
+			int block_size = 1048576;
+	      	Socket ReadSocket = servsock.accept();      			      	
+	      	byte [] ReadArray  = new byte [block_size];
+		    InputStream InStream = ReadSocket.getInputStream();
+		    String realPath;
+		    if(indicator) realPath = name; 
+		    else realPath = folder+"/"+name;
+		    FileOutputStream fos = new FileOutputStream(realPath);			    
+		    if(filesize<block_size)
+		    {
+		    	InStream.read(ReadArray);				    
+		    	fos.write(ReadArray);
+		    }
+		    else
+		    {			    	
+		    	do {
+		    		bytesRead = InStream.read(ReadArray);
+		    		if(bytesRead>=1) fos.write(ReadArray,0,bytesRead);
+		    		else break;			    		
+		    	}while(true);
+		    }			    
+		    fos.flush();				    
+		    fos.close();
+		    ReadSocket.close();
 		} catch (IOException e) {			
 			e.printStackTrace();
 		}
 		
 	}
-
-	
-
 }
