@@ -8,9 +8,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
-// put command in one string , use java.io.Writer / Reader
-// make block reading , writing
-// try to use Java NIO channels
+/*
+ * server:
+write small files (less 1MB)
+rotate port for data retrieve
+send to client port for data transfer
+remove hardcoded path
+set timeout for GetFiles ServerSocket open
+
+client:
+get port from server
+open socket only after port number retrieved
+ */
 
 
 public class MainServer {
@@ -61,6 +70,7 @@ public class MainServer {
 				sock.close();
 
 			}
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

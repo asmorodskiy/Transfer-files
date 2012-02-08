@@ -40,7 +40,7 @@ public class GetFiles implements Runnable {
 		    if(filesize<block_size)
 		    {
 		    	InStream.read(ReadArray);				    
-		    	fos.write(ReadArray);
+		    	fos.write(ReadArray,0,ReadArray.length);
 		    }
 		    else
 		    {			    	
@@ -53,6 +53,7 @@ public class GetFiles implements Runnable {
 		    fos.flush();				    
 		    fos.close();
 		    ReadSocket.close();
+		    servsock.close();
 		} catch (IOException e) {			
 			e.printStackTrace();
 		}

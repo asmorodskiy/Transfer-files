@@ -3,6 +3,7 @@ package com.transferclient;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -61,11 +62,13 @@ public class MainClient {
 			      
 			      byte [] byteBuffer  = new byte [block_size];
 			      FileInputStream fileIS = new FileInputStream(fileToSend);			      
-			      OutputStream WriteSocketStream = sockWrite.getOutputStream();			      
+			      OutputStream WriteSocketStream = sockWrite.getOutputStream();
+			      OutputStreamWriter osw = new OutputStreamWriter(WriteSocketStream);
 			      
 			      if(fileToSend.length()<block_size)
 			      {
 			    	  fileIS.read(byteBuffer);
+			    	  //osw.write("Test"); 
 			    	  WriteSocketStream.write(byteBuffer,0,byteBuffer.length);			    	  
 			      }
 			      else
