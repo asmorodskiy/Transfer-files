@@ -1,10 +1,12 @@
 package com.transferclient;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
@@ -44,43 +46,52 @@ public class MainClient {
 				
 				  welcomeSocket = new Socket(targetHost,port);
 				  
+				  System.out.println("welcomeSocket created");
+				  
 				  int block_size = 1048576;
 				
-					
+				Thread.sleep(3000);	
 			      File fileToSend = new File (filePath);
 			      OutputStream socketStream = welcomeSocket.getOutputStream();
 			      OutputStreamWriter socketStream_writer = new OutputStreamWriter(socketStream);
 			      BufferedWriter buferedWriter = new BufferedWriter(socketStream_writer);
-			      if(targetPath.isEmpty()) buferedWriter.write(String.format("%d %d %s",fileToSend.length(),0,fileToSend.getName()));
-			      else buferedWriter.write(String.format("%d %d %s",fileToSend.length(),1,targetPath));			      
-			      buferedWriter.flush();
-			      buferedWriter.close();
-			      welcomeSocket.close();
-			      Thread.sleep(1000);
+			      if(targetPath.isEmpty()) buferedWriter.write(String.format("%d %s",fileToSend.length(),fileToSend.getName()));
+			      else buferedWriter.write(String.format("%d %s",fileToSend.length(),targetPath));
+			      System.out.println("Writing string to server");
+			      buferedWriter.flush();			      
+			      System.out.println("Flushing");
 			      
-			      Socket sockWrite = new Socket(targetHost,port-1);
+			      InputStream is = welcomeSocket.getInputStream();
+
+			      InputStreamReader reader = new InputStreamReader(is);
+					
+				 BufferedReader breader = new BufferedReader(reader);
+				 
+				 System.out.println("Before read from Welcome socket");
+				 
+				  int writePort = breader.read();
+				  
+				  System.out.println("before closing Welcome Socket");
+			      
+				  buferedWriter.close();
+			      welcomeSocket.close();
+			      
+			      
+			      Socket sockWrite = new Socket(targetHost,writePort);
 			      
 			      byte [] byteBuffer  = new byte [block_size];
 			      FileInputStream fileIS = new FileInputStream(fileToSend);			      
-			      OutputStream WriteSocketStream = sockWrite.getOutputStream();
-			      OutputStreamWriter osw = new OutputStreamWriter(WriteSocketStream);
+			      OutputStream WriteSocketStream = sockWrite.getOutputStream();	     
 			      
-			      if(fileToSend.length()<block_size)
-			      {
-			    	  fileIS.read(byteBuffer);
-			    	  //osw.write("Test"); 
-			    	  WriteSocketStream.write(byteBuffer,0,byteBuffer.length);			    	  
-			      }
-			      else
-			      {
-				      int nextByte = 0;
+			      
+			      int nextByte = 0;
 				      do {				    	  
 				    	  nextByte=fileIS.read(byteBuffer);
 				    	  if(nextByte>=1) WriteSocketStream.write(byteBuffer,0,nextByte);
 				    	  else break;
 				    	  WriteSocketStream.flush();				    	  
 				      }while(true);
-			      }
+			      
 			      sockWrite.close();
 			   	
 			} catch (UnknownHostException e) {				
@@ -88,9 +99,9 @@ public class MainClient {
 			} catch (IOException e) {				
 				e.printStackTrace();
 			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-		    	  
+			} 		    	  
 
 	}
 

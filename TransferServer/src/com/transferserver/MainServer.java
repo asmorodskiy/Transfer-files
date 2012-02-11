@@ -1,9 +1,12 @@
 package com.transferserver;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.StringTokenizer;
@@ -41,6 +44,7 @@ public class MainServer {
 
 		try {
 			servsock = new ServerSocket(port);
+			int portClient = port -1;
 			while (true) {				
 
 				Socket sock = servsock.accept();			
@@ -55,18 +59,23 @@ public class MainServer {
 				
 				String filesizestr = response.nextToken();
 				
-				String boolstr = response.nextToken();
-				
 				String filePath = response.nextToken();
 				
 				long filesize = Long.valueOf(filesizestr);
 				
-				boolean indicator = boolstr.equals("1");
-				
-				Runnable runnable = new GetFiles(filesize,filePath,indicator,port-1);
+				Runnable runnable = new GetFiles(filesize,filePath,portClient);
 				
 				(new Thread(runnable)).start();
-
+				
+				OutputStream out = sock.getOutputStream();
+				
+				OutputStreamWriter socketStream_writer = new OutputStreamWriter(out);
+			    BufferedWriter buferedWriter = new BufferedWriter(socketStream_writer);
+			    
+			    buferedWriter.write(portClient);
+			    
+			    portClient --;
+			    
 				sock.close();
 
 			}
